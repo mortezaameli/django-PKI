@@ -1,0 +1,16 @@
+# run docker and mount local data with docker containter
+docker run \
+  -v ~/Desktop/pki-storage-test/pki_db:/apps/pki_app/pki_db/ \
+  -v ~/Desktop/pki-storage-test/sqlite_db/db.sqlite3:/apps/db.sqlite3 \
+  -it --name pki_testing -p 80:8000 pki:test
+
+
+# python manage.py test pki_app.tests.PkiTest.test_get_certs_list
+# docker build -t pki:test .
+docker run \
+  -v /home/morteza72/Desktop/db.sqlite3:/apps/db.sqlite3 \
+  -it --name pki_testing -p 80:8000 pki:test
+
+
+# in another terminal:
+docker exec -it pki_testing /bin/bash

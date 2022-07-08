@@ -1,0 +1,13 @@
+*.cert
+*.csr
+*.key
+*.pem
+*.crl
+*.r0
+*.0
+*.sqlite3
+*.pyc
+*.pyo
+
+__pycache__
+pki_app/pki_db/

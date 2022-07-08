@@ -1,0 +1,118 @@
+# create self-sign cert 
+{
+	"name": "root-ca",
+	"key_type": "RSA",
+	"key_size": 2048,
+	"validity_days": 365,
+	"subject_info": {
+		"domain_name": "root_ca",
+		"organization": "ca_org",
+		"organization_unit": "ca_ou",
+		"locality": "internal",
+		"state": "Tehran",
+		"country": "IR",
+		"email": "ca@ca"
+	}
+}
+
+curl \
+  -H "Content-Type: application/json" \
+  -d '{"name": "root-ca", "key_type": "rsa", "key_size": 2048, "validity_days": 365, "subject_info": {"domain_name": "rootCA", "organization": "ca_org", "organization_unit": "ca_ou", "locality": "internal", "state": "Tehran", "country": "IR", "email": "ca@test.com"}}' \
+  -X POST \
+  http://localhost:8000/pki/cert/local/selfsign/generate/
+
+-------------------------------------------------------------------------------------------
+
+# create csr
+{
+	"name": "Signing-CA",
+	"key_type": "RSA",
+	"key_size": 1024,
+	"privkey_pass": "csr1pass",
+	"subject_info": {
+		"domain_name": "signing_ca",
+		"organization": "org2",
+		"organization_unit": "org unit 2",
+		"locality": "Tehran",
+		"state": "asia",
+		"country": "IR",
+		"email": "signing@ca"
+	}
+}
+
+# curl -H "Content-Type: application/json" -X POST \
+#   -d '{"name": "Signing-CA", "key_type": "RSA", "key_size": 1024, "is_ca": true, "subject_info": {"domain_name": "signing_ca", "organization": "org2", "organization_unit": "org unit 2", "locality": "Tehran", "state": "asia", "country": "IR", "email": "signing@ca"}}' \
+#   http://localhost:8000/pki/cert/local/csr/generate/
+
+curl \
+  -H "Content-Type: application/json" \
+  -d '{"name": "cert1", "key_type": "RSA", "key_size": 1024, "privkey_pass": "csr1pass", "subject_info": {"domain_name": "test_client", "organization": "home", "organization_unit": "room", "locality": "Tehran", "state": "asia", "country": "IR", "email": "test@home"}}' \
+  -X POST \
+  http://localhost:8000/pki/cert/local/csr/generate/
+
+-------------------------------------------------------------------------------------------
+
+# sign csr
+
+curl \
+  -H "Content-Type: application/json"\
+  -d '{"category": "Local Cert" ,"name": "cert1", "validity_days": 120}' \
+  -X POST \
+  http://localhost:8000/pki/cert/local/csr/sign/
+
+curl \
+  -H "Content-Type: application/json" \
+  -d '{"category": "Remote Cert" ,"name": "upladed_csr1", "validity_days": 120}' \
+  -X POST \
+  http://localhost:8000/pki/cert/local/csr/sign/
+
+-------------------------------------------------------------------------------------------
+
+# delete cert
+curl -X DELETE http://localhost:8000/pki/cert/<int:pk>/
+
+-------------------------------------------------------------------------------------------
+
+# upload csr and set a name for it
+
+curl \
+  -H "Content-Type: multipart/form-data" \
+  -F "csr_file=@/home/morteza72/Desktop/test_for_remote.csr" \
+  -X PUT \
+  http://localhost:8000/pki/cert/remote/csr/import/
+
+-------------------------------------------------------------------------------------------
+
+# upload a cert file
+curl \
+  -H "Content-Type: multipart/form-data" \
+  -F "cert_file=@/home/morteza72/Desktop/test_client.crt" \
+  -X PUT \
+  http://localhost:8000/pki/cert/file/
+
+-------------------------------------------------------------------------------------------
+
+# upload a remote ca file
+curl \
+  -H "Content-Type: multipart/form-data" \
+  -F "ca_file=@/home/morteza72/Desktop/root-ca.cer" \
+  -X PUT \
+  http://localhost:8000/pki/cert/remote/ca/import/
+
+-------------------------------------------------------------------------------------------
+# generate a crl file
+curl \
+  -H "Content-Type: application/json" \
+  -X POST \
+  http://localhost:8000/pki/crl/generate/
+
+-------------------------------------------------------------------------------------------
+
+# upload a crl file
+curl \
+  -H "Content-Type: multipart/form-data" \
+  -F "crl_file=@/home/morteza72/Desktop/test.crl" \
+  -X PUT \
+  http://localhost:8000/pki/crl/import/
+
+-------------------------------------------------------------------------------------------
